@@ -1,0 +1,71 @@
+{
+  "name": "nostrwitter",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@testing-library/jest-dom": "^5.16.5",
+    "@testing-library/react": "^13.4.0",
+    "@testing-library/user-event": "^13.5.0",
+    "@types/jest": "^27.5.2",
+    "@types/node": "^16.18.14",
+    "@types/react": "^18.0.28",
+    "@types/react-dom": "^18.0.11",
+    "bootstrap": "^5.2.3",
+    "dotenv": "^16.0.3",
+    "i": "^0.3.7",
+    "nostr-tools": "^1.7.4",
+    "npm": "^9.6.0",
+    "process": "^0.11.10",
+    "react": "^18.2.0",
+    "react-app-rewired": "^2.2.1",
+    "react-bootstrap": "^2.7.2",
+    "react-dom": "^18.2.0",
+    "react-favicon": "^1.0.1",
+    "react-scripts": "5.0.1",
+    "react-toastify": "^9.1.1",
+    "react-tooltip": "^5.9.1",
+    "twitter-api-v2": "^1.14.2",
+    "typescript": "^4.9.5",
+    "web-vitals": "^2.1.4",
+    "websocket-polyfill": "^0.0.3"
+  },
+  "scripts": {
+    "start": "react-app-rewired start",
+    "build": "react-app-rewired build",
+    "test": "react-app-rewired test",
+    "eject": "react-app-rewired eject"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "assert": "npm:assert",
+    "buffer": "npm:buffer-browserify",
+    "crypto": "npm:crypto-browserify@3.12.0",
+    "http": "npm:stream-http",
+    "https": "npm:https-browserify",
+    "os": "npm:os-browserify",
+    "path": "npm:path-browserify",
+    "process": "npm:process-browserify",
+    "react-router-dom": "^6.8.2",
+    "stream": "npm:stream-browserify@3.0.0",
+    "url": "npm:url",
+    "util": "npm:util@0.12.5",
+    "zlib": "npm:browserify-zlib"
+  }
+}
