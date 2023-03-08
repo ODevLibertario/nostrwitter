@@ -4,7 +4,7 @@ import {Button, Col, Container, Form, Row} from "react-bootstrap";
 import {TwitterBackendService} from "../service/twitter.backend.service";
 import {NostrService} from "../service/nostr.service";
 import {toast} from "react-toastify";
-import {toastFailure} from "../toast.utils";
+import {toastFailure, toastWarn} from "../toast.utils";
 import info from '../resources/img/info.png';
 import {Tooltip} from 'react-tooltip'
 
@@ -140,6 +140,7 @@ class Home extends React.Component<any, any> {
     }
 
     authorizeTwitter(){
+        toast("Request to authorize on Twitter sent, please wait...", toastWarn)
         this.twitterBackendService.getAuthorization().then(authorization => {
             this.setState({...this.state, twitterAuthorization: authorization});
             window.open(authorization.url, '_blank', 'noopener,noreferrer');

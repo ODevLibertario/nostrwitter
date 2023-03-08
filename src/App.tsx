@@ -9,7 +9,6 @@ import Favicon from "react-favicon";
 window.Buffer = window.Buffer || require("buffer").Buffer;
 window.process = window.process || require("process");
 require('dotenv').config()
-console.log(process.env)
 
 function App() {
   return (
