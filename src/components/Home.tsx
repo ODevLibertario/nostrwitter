@@ -10,7 +10,6 @@ import {Tooltip} from 'react-tooltip'
 
 
 class Home extends React.Component<any, any> {
-
     private twitterBackendService = new TwitterBackendService()
     private nostrService: NostrService | null = null;
 
@@ -20,6 +19,11 @@ class Home extends React.Component<any, any> {
     }
 
     componentDidMount() {
+        const search = window.location.search;
+        let queryParams = new URLSearchParams(search)
+        console.log("token: " +queryParams.get("oauth_token"))
+        console.log("verifier: " +queryParams.get("oauth_verifier"))
+
         if(!this.state.nostrRelays) {
             console.log("Fetching public Nostr relays")
             fetch("https://api.nostr.watch/v1/public").then(response =>
