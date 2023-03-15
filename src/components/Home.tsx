@@ -5,7 +5,6 @@ import {TwitterBackendService} from "../service/twitter.backend.service";
 import {NostrService} from "../service/nostr.service";
 import {toast} from "react-toastify";
 import {toastFailure, toastWarn} from "../toast.utils";
-import info from '../resources/img/info.png';
 import {Tooltip} from 'react-tooltip'
 
 
@@ -21,8 +20,12 @@ class Home extends React.Component<any, any> {
     componentDidMount() {
         const search = window.location.search;
         let queryParams = new URLSearchParams(search)
-        console.log("token: " +queryParams.get("oauth_token"))
-        console.log("verifier: " +queryParams.get("oauth_verifier"))
+        let oauthToken = queryParams.get("oauth_token")
+        let oauthVerifier = queryParams.get("oauth_verifier")
+
+        if(oauthToken && oauthVerifier) {
+            this.loginTwitter(oauthToken, oauthVerifier)
+        }
 
         if(!this.state.nostrRelays) {
             console.log("Fetching public Nostr relays")
@@ -106,31 +109,19 @@ class Home extends React.Component<any, any> {
                     {!this.state.loggedInTwitter && <Form>
                         <Form.Group className="mb-3" controlId="formBasicEmail">
                             <Form.Label style={{color: '#06bfea', fontWeight: 'bold'}}>Login in to Twitter</Form.Label>
-                            <Form.Control type="password" placeholder="Enter the authorization PIN"
-                                          value={this.state.twitterPin}
-                                          onChange={this.handleChangeTwitterPin.bind(this)}/>
-                            <Form.Text className="text-muted" style={{fontWeight: 'bold'}}>
-                                Your Twitter credentials are not acessed by this application <img src={info} width="20px" data-tooltip-id="info-tooltip" data-tooltip-content="Your Twitter credentials are not acessed by this application, an authorization to post
-                                is granted that can be revogated at anytime in the Twitter settings,\n PIN authorization is only applicable for one tweet since
-                                authorization keys are not stored." />
-                            </Form.Text>
                         </Form.Group>
-                        <Button disabled={!this.state.twitterAuthorization} variant="primary"
-                                style={{backgroundColor: '#06bfea', fontWeight: 'bold', float: 'right'}}
-                                onClick={this.loginTwitter.bind(this)}>
-                            Send
-                        </Button>
                         <Button variant="primary" style={{
                             backgroundColor: '#06bfea',
                             fontWeight: 'bold',
-                            float: 'right',
-                            marginRight: '1%'
+                            float: 'left',
+                            marginRight: '1%',
+
                         }} onClick={this.authorizeTwitter.bind(this)}>
-                            Authorize and Get PIN
+                            Authorize
                         </Button>
                     </Form>}
                     {this.state.loggedInTwitter && <div>
-                        {this.state.twitterPin && <span style={{color: '#06bfea', fontWeight: 'bold', fontSize: '20px'}}>Logged in to Twitter with PIN: **{this.state.twitterPin.substring(this.state.twitterPin.length - 5)}</span>}
+                        {<span style={{color: '#06bfea', fontWeight: 'bold', fontSize: '20px'}}>Logged in to Twitter</span>}
                         <Button variant="primary"
                                 style={{backgroundColor: '#06bfea', fontWeight: 'bold', float: 'right'}}
                                 onClick={this.logoutTwitter.bind(this)}>
@@ -144,7 +135,7 @@ class Home extends React.Component<any, any> {
     }
 
     authorizeTwitter(){
-        toast("Request to authorize on Twitter sent, please wait...", toastWarn)
+        toast("Request sent. If nothing happens the backend is waking up, please try again...", toastWarn)
         this.twitterBackendService.getAuthorization().then(authorization => {
             this.setState({...this.state, twitterAuthorization: authorization});
             window.open(authorization.url, '_blank', 'noopener,noreferrer');
@@ -173,16 +164,12 @@ class Home extends React.Component<any, any> {
         }
     }
 
-    handleChangeTwitterPin(event: any) {
-        this.setState({...this.state, twitterPin: event.target.value});
-    }
-
-    loginTwitter(){
-        this.setState({...this.state, loggedInTwitter: true})
+    loginTwitter(oauthToken: string, oauthVerifier: string){
+        this.setState({...this.state, twitterOauthToken: oauthToken, twitterOauthVerifier: oauthVerifier, loggedInTwitter: true})
     }
 
     logoutTwitter(){
-        this.setState({...this.state, loggedInTwitter: false, twitterPin: undefined, twitterAuthorization: undefined})
+        this.setState({...this.state, loggedInTwitter: false, twitterAuthorization: undefined, twitterOauthToken: undefined, twitterOauthVerifier: undefined})
     }
 
     logoutNostr(){
@@ -193,10 +180,11 @@ class Home extends React.Component<any, any> {
         this.setState({
             ...this.state,
             loggedInTwitter: false,
-            twitterPin: undefined,
             twitterAuthorization: undefined,
             loggedInNostr: false,
-            nostrNsec: undefined
+            nostrNsec: undefined,
+            twitterOauthToken: undefined,
+            twitterOauthVerifier: undefined
         })
 
     }
@@ -204,7 +192,11 @@ class Home extends React.Component<any, any> {
     noteAndTweet(){
         if(this.nostrService){
             this.nostrService.post(this.state.nostrNsec, this.state.post)
-            this.twitterBackendService.tweet(this.state.twitterPin, this.state.twitterAuthorization, this.state.post).then(r => console.log(r)).catch(e => console.log(e))
+            this.twitterBackendService.tweet(
+                this.state.twitterOauthToken,
+                this.state.twitterOauthVerifier,
+                this.state.twitterAuthorization,
+                this.state.post).then(r => console.log(r)).catch(e => console.log(e))
             this.logoutTwitter()
         }else {
             toast("Nostr client initialization failed, refresh the page and try again", toastFailure)

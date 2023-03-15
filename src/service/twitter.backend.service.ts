@@ -12,10 +12,15 @@ export class TwitterBackendService {
         })
     }
 
-    tweet(pin: string, authorization: {oauth_token: string, oauth_token_secret: string}, post: string){
+    tweet(oauthToken: string, oauthVerifier: string, authorization: {oauth_token: string, oauth_token_secret: string}, post: string){
         return fetch(process.env.REACT_APP_TWITTER_BACKEND_HOST +"/twitter/tweet", {
             method: 'POST',
-            body: JSON.stringify({pin, oauth_token: authorization.oauth_token, oauth_token_secret: authorization.oauth_token_secret, post})
+            body: JSON.stringify({
+                oauthToken,
+                oauthVerifier,
+                oauthTokenSecret: authorization.oauth_token_secret,
+                post
+            })
         }).then(response => {
             toast("Tweet sent", toastSuccess)
             return response.json().then(json => json)
