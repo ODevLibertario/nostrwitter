@@ -14,10 +14,19 @@ class Home extends React.Component<any, any> {
 
     constructor(props: any) {
         super(props);
-        this.state = {nostrNsec: undefined, twitterPin: undefined};
+        this.state = {loggedInNostr: false, loggedInTwitter: false};
     }
 
     componentDidMount() {
+        this.setState({
+            ...this.state,
+            loggedInNostr: Boolean(localStorage.getItem("loggedInNostr")),
+            loggedInTwitter: Boolean(localStorage.getItem("loggedInTwitter"))
+            }
+
+        )
+
+
         const search = window.location.search;
         let queryParams = new URLSearchParams(search)
         let oauthToken = queryParams.get("oauth_token")
@@ -137,7 +146,7 @@ class Home extends React.Component<any, any> {
     authorizeTwitter(){
         toast("Request sent. If nothing happens the backend is waking up, please try again...", toastWarn)
         this.twitterBackendService.getAuthorization().then(authorization => {
-            this.setState({...this.state, twitterAuthorization: authorization});
+            localStorage.setItem("oauth_token_secret", authorization.oauth_token_secret)
             window.open(authorization.url, '_blank', 'noopener,noreferrer');
         }).catch(e => console.log(e))
     }
@@ -155,6 +164,8 @@ class Home extends React.Component<any, any> {
             const type = nip19.decode(this.state.nostrNsec).type
 
             if (type == 'nsec') {
+                localStorage.setItem("loggedInNostr", 'true')
+                localStorage.setItem("nostrNsec", this.state.nostrNsec)
                 this.setState({...this.state, loggedInNostr: true})
             } else {
                 throw "Invalid nsec"
@@ -165,37 +176,47 @@ class Home extends React.Component<any, any> {
     }
 
     loginTwitter(oauthToken: string, oauthVerifier: string){
-        this.setState({...this.state, twitterOauthToken: oauthToken, twitterOauthVerifier: oauthVerifier, loggedInTwitter: true})
+        localStorage.setItem("oauthToken", oauthToken)
+        localStorage.setItem("oauthVerifier", oauthVerifier)
+        localStorage.setItem("loggedInTwitter", 'true')
+        this.setState({...this.state, loggedInTwitter: true})
     }
 
     logoutTwitter(){
-        this.setState({...this.state, loggedInTwitter: false, twitterAuthorization: undefined, twitterOauthToken: undefined, twitterOauthVerifier: undefined})
+        localStorage.removeItem("oauthToken")
+        localStorage.removeItem("oauthVerifier")
+        localStorage.removeItem("oauth_token_secret")
+        localStorage.setItem("loggedInTwitter", 'false')
+        this.setState({...this.state, loggedInTwitter: false})
     }
 
     logoutNostr(){
-        this.setState({...this.state, loggedInNostr: false, nostrNsec: undefined})
+        localStorage.setItem("loggedInNostr", 'false')
+        localStorage.removeItem("nostrNsec")
+        this.setState({...this.state, loggedInNostr: false})
     }
 
     logout(){
+        localStorage.removeItem("oauthToken")
+        localStorage.removeItem("oauthVerifier")
+        localStorage.setItem("loggedInTwitter", 'false')
+        localStorage.setItem("loggedInNostr", 'false')
+        localStorage.removeItem("nostrNsec")
         this.setState({
             ...this.state,
             loggedInTwitter: false,
-            twitterAuthorization: undefined,
             loggedInNostr: false,
-            nostrNsec: undefined,
-            twitterOauthToken: undefined,
-            twitterOauthVerifier: undefined
         })
 
     }
 
     noteAndTweet(){
         if(this.nostrService){
-            this.nostrService.post(this.state.nostrNsec, this.state.post)
+            this.nostrService.post(localStorage.getItem("nostrNsec")!!, this.state.post)
             this.twitterBackendService.tweet(
-                this.state.twitterOauthToken,
-                this.state.twitterOauthVerifier,
-                this.state.twitterAuthorization,
+                localStorage.getItem("oauthToken")!,
+                localStorage.getItem("oauthVerifier")!,
+                localStorage.getItem("oauth_token_secret")!,
                 this.state.post).then(r => console.log(r)).catch(e => console.log(e))
             this.logoutTwitter()
         }else {
