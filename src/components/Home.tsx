@@ -18,13 +18,13 @@ class Home extends React.Component<any, any> {
     }
 
     componentDidMount() {
+        console.log("component did mount")
         this.setState({
             ...this.state,
             loggedInNostr: Boolean(localStorage.getItem("loggedInNostr")),
             loggedInTwitter: Boolean(localStorage.getItem("loggedInTwitter")),
             nostrNsec: localStorage.getItem("nostrNsec")
             }
-
         )
 
 
