@@ -19,23 +19,25 @@ class Home extends React.Component<any, any> {
 
     componentDidMount() {
         console.log("component did mount")
-        this.setState({
-            ...this.state,
-            loggedInNostr: Boolean(localStorage.getItem("loggedInNostr")),
-            loggedInTwitter: Boolean(localStorage.getItem("loggedInTwitter")),
-            nostrNsec: localStorage.getItem("nostrNsec")
-            }
-        )
 
-
+        let loggedInTwitter = false
         const search = window.location.search;
         let queryParams = new URLSearchParams(search)
         let oauthToken = queryParams.get("oauth_token")
         let oauthVerifier = queryParams.get("oauth_verifier")
 
         if(oauthToken && oauthVerifier) {
+            loggedInTwitter = true
             this.loginTwitter(oauthToken, oauthVerifier)
         }
+
+        this.setState({
+                ...this.state,
+                loggedInNostr: Boolean(localStorage.getItem("loggedInNostr")),
+                loggedInTwitter: loggedInTwitter,
+                nostrNsec: localStorage.getItem("nostrNsec")
+            }
+        )
 
         if(!this.state.nostrRelays) {
             console.log("Fetching public Nostr relays")
@@ -180,7 +182,6 @@ class Home extends React.Component<any, any> {
         localStorage.setItem("oauthToken", oauthToken)
         localStorage.setItem("oauthVerifier", oauthVerifier)
         localStorage.setItem("loggedInTwitter", 'true')
-        this.setState({...this.state, loggedInTwitter: true})
     }
 
     logoutTwitter(){
