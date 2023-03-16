@@ -220,7 +220,7 @@ class Home extends React.Component<any, any> {
                 localStorage.getItem("oauth_token_secret")!,
                 this.state.post).then(r => {
                 toast("Success!", toastSuccess)
-                sleeper(2000).call(this).then(r => {
+                sleeper(2000).call(this, undefined).then(r => {
                     toast("Redirecting you to Authorize twitter so you can crosspost again", toastWarn)
                 }).then(sleeper(1500)).then(r => {
                     this.authorizeTwitter()
