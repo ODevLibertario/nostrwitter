@@ -4,7 +4,7 @@ import {Button, Col, Container, Form, Row} from "react-bootstrap";
 import {TwitterBackendService} from "../service/twitter.backend.service";
 import {NostrService} from "../service/nostr.service";
 import {toast} from "react-toastify";
-import {toastFailure, toastWarn} from "../toast.utils";
+import {toastFailure, toastSuccess, toastWarn} from "../toast.utils";
 import {Tooltip} from 'react-tooltip'
 
 
@@ -21,7 +21,8 @@ class Home extends React.Component<any, any> {
         this.setState({
             ...this.state,
             loggedInNostr: Boolean(localStorage.getItem("loggedInNostr")),
-            loggedInTwitter: Boolean(localStorage.getItem("loggedInTwitter"))
+            loggedInTwitter: Boolean(localStorage.getItem("loggedInTwitter")),
+            nostrNsec: Boolean(localStorage.getItem("nostrNsec"))
             }
 
         )
@@ -217,8 +218,16 @@ class Home extends React.Component<any, any> {
                 localStorage.getItem("oauthToken")!,
                 localStorage.getItem("oauthVerifier")!,
                 localStorage.getItem("oauth_token_secret")!,
-                this.state.post).then(r => console.log(r)).catch(e => console.log(e))
-            this.authorizeTwitter()
+                this.state.post).then(r => {
+                toast("Success!", toastSuccess)
+                sleeper(2000).call(this).then(r => {
+                    toast("Redirecting you to Authorize twitter so you can crosspost again", toastWarn)
+                }).then(sleeper(1500)).then(r => {
+                    this.authorizeTwitter()
+                })
+            }
+            ).catch(e => console.log(e))
+
         }else {
             toast("Nostr client initialization failed, refresh the page and try again", toastFailure)
         }
@@ -226,6 +235,12 @@ class Home extends React.Component<any, any> {
     }
 
 
+}
+
+function sleeper(ms: number) {
+    return function() {
+        return new Promise(resolve => setTimeout(() => resolve(), ms));
+    };
 }
 
 

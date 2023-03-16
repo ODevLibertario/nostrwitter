@@ -39,11 +39,11 @@ export class NostrService {
         let pub = this.pool.publish(this.connectedRelays, event)
 
         pub.on('ok', () => {
-            toast("Note published to a Nostr relay", toastSuccess)
+            console.log("Note published to a Nostr relay")
             }
         )
         pub.on('failed', (reason: any) => {
-            toast("Note publication to Nostr failed: " + reason, toastFailure)
+            console.log("Note publication to Nostr failed: " + reason)
         })
     }
 }

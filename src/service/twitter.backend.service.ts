@@ -22,10 +22,10 @@ export class TwitterBackendService {
                 post
             })
         }).then(response => {
-            toast("Tweet sent", toastSuccess)
+            console.log("Tweet sent")
             return response.json().then(json => json)
         }).catch(e => {
-            toast("Tweet publicaton failed" + e, toastFailure)
+           console.log("Tweet publicaton failed" + e)
         })
 
     }
