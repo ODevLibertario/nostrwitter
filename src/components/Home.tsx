@@ -22,7 +22,7 @@ class Home extends React.Component<any, any> {
         this.setState({
             ...this.state,
             loggedInNostr: Boolean(localStorage.getItem("loggedInNostr")),
-            loggedInTwitter: false,
+            loggedInTwitter: Boolean(localStorage.getItem("loggedInTwitter")),
             nostrNsec: localStorage.getItem("nostrNsec")
             }
         )
