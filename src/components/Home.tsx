@@ -147,7 +147,7 @@ class Home extends React.Component<any, any> {
         toast("Request sent. If nothing happens the backend is waking up, please try again...", toastWarn)
         this.twitterBackendService.getAuthorization().then(authorization => {
             localStorage.setItem("oauth_token_secret", authorization.oauth_token_secret)
-            window.open(authorization.url, '_blank', 'noopener,noreferrer');
+            window.open(authorization.url, '_self', 'noopener,noreferrer');
         }).catch(e => console.log(e))
     }
 
