@@ -218,7 +218,7 @@ class Home extends React.Component<any, any> {
                 localStorage.getItem("oauthVerifier")!,
                 localStorage.getItem("oauth_token_secret")!,
                 this.state.post).then(r => console.log(r)).catch(e => console.log(e))
-            this.logoutTwitter()
+            this.authorizeTwitter()
         }else {
             toast("Nostr client initialization failed, refresh the page and try again", toastFailure)
         }
