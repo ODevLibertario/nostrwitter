@@ -29,7 +29,7 @@ export class NostrService {
             pubkey: pk1,
             kind: 1,
             created_at: Math.round(Date.now() / 1000),
-            content: post + "\n\nhttps://i.imgur.com/rHSPT5Z.jpg",
+            content: post,
             tags: []
         }
 
