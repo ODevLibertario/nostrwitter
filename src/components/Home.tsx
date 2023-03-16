@@ -212,6 +212,7 @@ class Home extends React.Component<any, any> {
     }
 
     noteAndTweet(){
+        toast("Sending...", toastWarn)
         if(this.nostrService){
             this.nostrService.post(localStorage.getItem("nostrNsec")!!, this.state.post)
             this.twitterBackendService.tweet(
