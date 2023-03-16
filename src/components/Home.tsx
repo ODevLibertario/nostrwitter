@@ -238,8 +238,8 @@ class Home extends React.Component<any, any> {
 }
 
 function sleeper(ms: number) {
-    return function() {
-        return new Promise(resolve => setTimeout(() => resolve(), ms));
+    return function(x: any) {
+        return new Promise(resolve => setTimeout(() => resolve(x), ms));
     };
 }
 
