@@ -26,7 +26,7 @@ class Home extends React.Component<any, any> {
 
     componentDidMount() {
         this.interval = setInterval(() => {
-            this.backendService.ping()
+            this.backendService.ping().then(r => console.log(r))
         }, 60000)
 
         let loggedInTwitter = false
