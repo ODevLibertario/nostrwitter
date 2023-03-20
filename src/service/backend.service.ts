@@ -13,6 +13,10 @@ export class BackendService {
     }
 
     tweet(oauthToken: string, oauthVerifier: string, oauthTokenSecret: string, post: string, imageBase64: string | undefined){
+        if(imageBase64){
+            imageBase64 = imageBase64.split(",")[1]
+        }
+
         return fetch(process.env.REACT_APP_TWITTER_BACKEND_HOST +"/twitter/tweet", {
             method: 'POST',
             body: JSON.stringify({
