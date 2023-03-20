@@ -8,14 +8,15 @@ import {toastFailure, toastSuccess, toastWarn} from "../toast.utils";
 import {Tooltip} from 'react-tooltip'
 import ImageUploading from 'react-images-uploading';
 
+declare global {
+    interface Window { nostr: any; }
+}
 
 class Home extends React.Component<any, any> {
     private backendService = new BackendService()
     private nostrService: NostrService | null = null;
 
     private interval: any = undefined;
-
-    private extendedWindow: any = undefined
 
     constructor(props: any) {
         super(props);
@@ -27,7 +28,6 @@ class Home extends React.Component<any, any> {
     }
 
     componentDidMount() {
-        this.extendedWindow = window as any
         this.interval = setInterval(() => {
             console.log("ping")
             this.backendService.ping().then(r => console.log(r))
@@ -46,7 +46,7 @@ class Home extends React.Component<any, any> {
 
         this.setState({
                 ...this.state,
-                loggedInNostr: Boolean(localStorage.getItem("loggedInNostr") || this.extendedWindow.nostr),
+                loggedInNostr: Boolean(localStorage.getItem("loggedInNostr") || window.nostr),
                 loggedInTwitter: loggedInTwitter,
                 nostrNsec: localStorage.getItem("nostrNsec")
             }
@@ -163,8 +163,8 @@ class Home extends React.Component<any, any> {
                         </Button>
                     </Form>}
                     {this.state.loggedInNostr && <div>
-                        {this.extendedWindow && !this.extendedWindow.nostr && <span style={{color: '#8e2ebe', fontWeight: 'bold', fontSize: '20px'}}>Logged in to Nostr with: nsec*****{this.state.nostrNsec.substring(this.state.nostrNsec.length - 5)}</span>}
-                        {this.extendedWindow && this.extendedWindow.nostr && <span style={{color: '#8e2ebe', fontWeight: 'bold', fontSize: '20px'}}>Logged in to Nostr with a browser extension, please check if your private key is setup correctly there.</span>}
+                        {!window.nostr && <span style={{color: '#8e2ebe', fontWeight: 'bold', fontSize: '20px'}}>Logged in to Nostr with: nsec*****{this.state.nostrNsec.substring(this.state.nostrNsec.length - 5)}</span>}
+                        {window.nostr && <span style={{color: '#8e2ebe', fontWeight: 'bold', fontSize: '20px'}}>Logged in to Nostr with a browser extension, please check if your private key is setup correctly there.</span>}
                         <Button variant="primary"
                                 style={{backgroundColor: '#8e2ebe', fontWeight: 'bold', float: 'right', marginTop: '3%'}}
                                 onClick={this.logoutNostr.bind(this)}>
@@ -288,8 +288,8 @@ class Home extends React.Component<any, any> {
     }
 
     noteAndTweet(imageBase64?: string, imageLink?: string){
-        if(this.extendedWindow.nostr){
-            this.nostrService?.postWithExtension(this.extendedWindow.nostr, this.state.post, imageLink)
+        if(window.nostr){
+            this.nostrService?.postWithExtension(window.nostr, this.state.post, imageLink)
         }else {
             this.nostrService!.postWithNsec(localStorage.getItem("nostrNsec")!!, this.state.post, imageLink)
         }
