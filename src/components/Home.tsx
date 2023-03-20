@@ -26,6 +26,7 @@ class Home extends React.Component<any, any> {
 
     componentDidMount() {
         this.interval = setInterval(() => {
+            console.log("ping")
             this.backendService.ping().then(r => console.log(r))
         }, 60000)
 
@@ -87,7 +88,7 @@ class Home extends React.Component<any, any> {
                             onChange={this.onChangeImage.bind(this)}
                             dataURLKey="data_url"
                             maxFileSize={1000000}
-                            acceptType={['jpg', 'gif', 'png']}
+                            acceptType={['jpg', 'jpeg', 'gif', 'png']}
                         >
                             {({
                                   imageList,
