@@ -15,7 +15,7 @@ class Home extends React.Component<any, any> {
 
     private interval: any = undefined;
 
-    private extendedWindow = window as any
+    private extendedWindow: any = undefined
 
     constructor(props: any) {
         super(props);
@@ -27,6 +27,7 @@ class Home extends React.Component<any, any> {
     }
 
     componentDidMount() {
+        this.extendedWindow = window as any
         this.interval = setInterval(() => {
             console.log("ping")
             this.backendService.ping().then(r => console.log(r))
