@@ -17,7 +17,7 @@ class Home extends React.Component<any, any> {
 
     constructor(props: any) {
         super(props);
-        this.state = {loggedInNostr: false, loggedInTwitter: false};
+        this.state = {loggedInNostr: false, loggedInTwitter: false, sending: false};
     }
 
     componentWillUnmount() {
@@ -74,7 +74,7 @@ class Home extends React.Component<any, any> {
 
     renderCrosspost() {
         return <Container style={{display: 'flex',  justifyContent:'center', alignItems:'center', height: '10vh', marginTop: '3%'}}>
-            <Row style={{marginTop: '30%', width: '70%'}}>
+            <Row style={{marginTop: '35%', width: '70%'}}>
                 <Col>
                     <Form>
                         <Form.Group className="mb-3" controlId="formBasicEmail">
@@ -117,7 +117,9 @@ class Home extends React.Component<any, any> {
                         </ImageUploading>
                         <Button variant="primary"
                                 style={{backgroundColor: '#8e2ebe', fontWeight: 'bold', float: 'right'}}
-                                onClick={this.noteAndTweetWithUpload.bind(this)}>
+                                onClick={this.noteAndTweetWithUpload.bind(this)}
+                                disabled={this.state.sending}
+                        >
                             Note & Tweet
                         </Button>
                         <Button variant="primary"
@@ -262,6 +264,7 @@ class Home extends React.Component<any, any> {
     }
 
     noteAndTweetWithUpload(){
+        this.setState({...this.state, sending: true})
         toast("Sending...", toastWarn)
         if(this.nostrService){
             const imageBase64 = this.state.image[0].data_url
@@ -295,7 +298,7 @@ class Home extends React.Component<any, any> {
                     this.authorizeTwitter()
                 })
             }
-        ).catch(e => console.log(e))
+        ).catch(e => console.log(e)).finally(() => this.setState({...this.state, sending: false}))
     }
 
 
