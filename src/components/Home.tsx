@@ -1,24 +1,33 @@
 import React from "react";
 import {nip19} from "nostr-tools";
 import {Button, Col, Container, Form, Row} from "react-bootstrap";
-import {TwitterBackendService} from "../service/twitter.backend.service";
+import {BackendService} from "../service/backend.service";
 import {NostrService} from "../service/nostr.service";
 import {toast} from "react-toastify";
 import {toastFailure, toastSuccess, toastWarn} from "../toast.utils";
 import {Tooltip} from 'react-tooltip'
+import ImageUploading from 'react-images-uploading';
 
 
 class Home extends React.Component<any, any> {
-    private twitterBackendService = new TwitterBackendService()
+    private backendService = new BackendService()
     private nostrService: NostrService | null = null;
+
+    private interval: any = undefined;
 
     constructor(props: any) {
         super(props);
         this.state = {loggedInNostr: false, loggedInTwitter: false};
     }
 
+    componentWillUnmount() {
+        clearInterval(this.interval)
+    }
+
     componentDidMount() {
-        console.log("component did mount")
+        this.interval = setInterval(() => {
+            this.backendService.ping()
+        }, 60000)
 
         let loggedInTwitter = false
         const search = window.location.search;
@@ -64,7 +73,7 @@ class Home extends React.Component<any, any> {
 
     renderCrosspost() {
         return <Container style={{display: 'flex',  justifyContent:'center', alignItems:'center', height: '10vh', marginTop: '3%'}}>
-            <Row style={{marginTop: '5%', width: '70%'}}>
+            <Row style={{marginTop: '30%', width: '70%'}}>
                 <Col>
                     <Form>
                         <Form.Group className="mb-3" controlId="formBasicEmail">
@@ -72,9 +81,40 @@ class Home extends React.Component<any, any> {
                             <Form.Control as="textarea" rows={5} placeholder="Write your post" value={this.state.post}
                                           onChange={this.handleChangePost.bind(this)}/>
                         </Form.Group>
+
+                        <ImageUploading
+                            value={this.state.image}
+                            onChange={this.onChangeImage.bind(this)}
+                            dataURLKey="data_url"
+                        >
+                            {({
+                                  imageList,
+                                  onImageUpload,
+                                  onImageRemoveAll,
+                                  onImageUpdate,
+                                  onImageRemove,
+                                  isDragging,
+                                  dragProps,
+                              }) => (
+                                // write your building UI
+                                <div className="upload__image-wrapper"
+                                     {...dragProps}
+                                     style={{border: "3px dashed #8E2EBE", fontWeight: 'bold', minHeight: '250px', height: 'fit-content', alignItems: 'center', justifyContent: 'center', display: 'flex', marginBottom: '3%'}}>
+                                    {imageList.length == 0 && <span onClick={onImageUpload} style={{color: '#8E2EBE', cursor: 'pointer'}}>Click or Drag your image here</span>}
+                                    {imageList.map((image, index) => (
+                                        <div key={index} className="image-item">
+                                            <img src={image['data_url']} alt="" width="250" />
+                                            <div className="image-item__btn-wrapper">
+                                                <Button style={{backgroundColor:'red', marginLeft: '30%', marginTop:'1%'}} onClick={() => onImageRemove(index)}>Remove</Button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </ImageUploading>
                         <Button variant="primary"
                                 style={{backgroundColor: '#8e2ebe', fontWeight: 'bold', float: 'right'}}
-                                onClick={this.noteAndTweet.bind(this)}>
+                                onClick={this.noteAndTweetWithUpload.bind(this)}>
                             Note & Tweet
                         </Button>
                         <Button variant="primary"
@@ -88,6 +128,12 @@ class Home extends React.Component<any, any> {
             </Row>
         </Container>
     }
+
+    onChangeImage(image: any, addUpdateIndex: any) {
+        // data for submit
+        console.log(image, addUpdateIndex);
+        this.setState({...this.state, image})
+    };
 
     renderLogin(){
         return <Container>
@@ -148,7 +194,7 @@ class Home extends React.Component<any, any> {
 
     authorizeTwitter(){
         toast("Request sent. If nothing happens the backend is waking up, please try again...", toastWarn)
-        this.twitterBackendService.getAuthorization().then(authorization => {
+        this.backendService.getAuthorization().then(authorization => {
             localStorage.setItem("oauth_token_secret", authorization.oauth_token_secret)
             window.open(authorization.url, '_self', 'noopener,noreferrer');
         }).catch(e => console.log(e))
@@ -212,15 +258,33 @@ class Home extends React.Component<any, any> {
 
     }
 
-    noteAndTweet(){
+    noteAndTweetWithUpload(){
         toast("Sending...", toastWarn)
         if(this.nostrService){
-            this.nostrService.post(localStorage.getItem("nostrNsec")!!, this.state.post)
-            this.twitterBackendService.tweet(
-                localStorage.getItem("oauthToken")!,
-                localStorage.getItem("oauthVerifier")!,
-                localStorage.getItem("oauth_token_secret")!,
-                this.state.post).then(r => {
+            const imageBase64 = this.state.image[0].data_url
+            if(this.state.image && imageBase64){
+                toast("Uploading image...", toastWarn)
+                this.backendService.upload(imageBase64).then(link => {
+                    toast("Upload done", toastSuccess)
+                    this.noteAndTweet(imageBase64, link as string)
+                })
+            }else {
+                this.noteAndTweet()
+            }
+        }else {
+            toast("Nostr client initialization failed, refresh the page and try again", toastFailure)
+        }
+
+    }
+
+    noteAndTweet(imageBase64?: string, imageLink?: string){
+        this.nostrService!.post(localStorage.getItem("nostrNsec")!!, this.state.post, imageLink)
+        this.backendService.tweet(
+            localStorage.getItem("oauthToken")!,
+            localStorage.getItem("oauthVerifier")!,
+            localStorage.getItem("oauth_token_secret")!,
+            this.state.post,
+            imageBase64).then(r => {
                 toast("Success!", toastSuccess)
                 sleeper(2000).call(this, undefined).then(r => {
                     toast("Redirecting you to Authorize twitter so you can crosspost again", toastWarn)
@@ -228,12 +292,7 @@ class Home extends React.Component<any, any> {
                     this.authorizeTwitter()
                 })
             }
-            ).catch(e => console.log(e))
-
-        }else {
-            toast("Nostr client initialization failed, refresh the page and try again", toastFailure)
-        }
-
+        ).catch(e => console.log(e))
     }
 
 

@@ -21,9 +21,13 @@ export class NostrService {
         })
     }
 
-    post(nsec: string, post: string){
+    post(nsec: string, post: string, imageLink: string | undefined){
         const sk1 = nip19.decode(nsec).data as string
         let pk1 = getPublicKey(sk1)
+
+        if(imageLink){
+            post = post + "\n\n"+imageLink
+        }
 
         let event: any = {
             pubkey: pk1,
