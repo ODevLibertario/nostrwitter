@@ -86,6 +86,8 @@ class Home extends React.Component<any, any> {
                             value={this.state.image}
                             onChange={this.onChangeImage.bind(this)}
                             dataURLKey="data_url"
+                            maxFileSize={1000000}
+                            acceptType={['jpg', 'gif', 'png']}
                         >
                             {({
                                   imageList,
