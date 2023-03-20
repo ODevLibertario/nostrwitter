@@ -26,7 +26,7 @@ export class NostrService {
 
         console.log("post "+ post)
 
-        nostr.getPublicKey().then(publicKey => {
+        return nostr.getPublicKey().then(publicKey => {
             let event: any = {
                 pubkey: publicKey,
                 kind: 1,
@@ -36,7 +36,7 @@ export class NostrService {
             }
 
             event.id = getEventHash(event)
-            nostr.signEvent(event).then((signature: any) => {
+            return nostr.signEvent(event).then((signature: any) => {
                 event.sig = signature.sig
 
                 let pub = this.pool.publish(this.connectedRelays, event)

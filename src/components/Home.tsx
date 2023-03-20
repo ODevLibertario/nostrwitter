@@ -163,8 +163,8 @@ class Home extends React.Component<any, any> {
                         </Button>
                     </Form>}
                     {this.state.loggedInNostr && <div>
-                        {!window.nostr && this.state.nostrNsec && <span style={{color: '#8e2ebe', fontWeight: 'bold', fontSize: '20px'}}>Logged in to Nostr with: nsec*****{this.state.nostrNsec.substring(this.state.nostrNsec.length - 5)}</span>}
-                        {window.nostr && <span style={{color: '#8e2ebe', fontWeight: 'bold', fontSize: '20px'}}>Logged in to Nostr with a browser extension, please check if your private key is setup correctly there.</span>}
+                        {this.state.nostrNsec && <span style={{color: '#8e2ebe', fontWeight: 'bold', fontSize: '20px'}}>Logged in to Nostr with: nsec*****{this.state.nostrNsec.substring(this.state.nostrNsec.length - 5)}</span>}
+                        {!this.state.nostrNsec && <span style={{color: '#8e2ebe', fontWeight: 'bold', fontSize: '20px'}}>Logged in to Nostr with a browser extension, please check if your private key is setup correctly there.</span>}
                         <Button variant="primary"
                                 style={{backgroundColor: '#8e2ebe', fontWeight: 'bold', float: 'right', marginTop: '3%'}}
                                 onClick={this.logoutNostr.bind(this)}>
@@ -289,10 +289,17 @@ class Home extends React.Component<any, any> {
 
     noteAndTweet(imageBase64?: string, imageLink?: string){
         if(window.nostr){
-            this.nostrService?.postWithExtension(window.nostr, this.state.post, imageLink)
+            this.nostrService?.postWithExtension(window.nostr, this.state.post, imageLink).then(r => {
+                this.tweet(imageBase64)
+            })
         }else {
             this.nostrService!.postWithNsec(localStorage.getItem("nostrNsec")!!, this.state.post, imageLink)
+            this.tweet(imageBase64);
         }
+    }
+
+
+    private tweet(imageBase64: string | undefined) {
         this.backendService.tweet(
             localStorage.getItem("oauthToken")!,
             localStorage.getItem("oauthVerifier")!,
@@ -306,10 +313,9 @@ class Home extends React.Component<any, any> {
                     this.authorizeTwitter()
                 })
             }
-        ).catch(e => console.log(e)).finally(() => this.setState({...this.state, sending: false}))
+        ).catch(e => console.log(e))
+            .finally(() => this.setState({...this.state, sending: false}))
     }
-
-
 }
 
 function sleeper(ms: number) {
