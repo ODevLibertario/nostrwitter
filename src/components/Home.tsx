@@ -163,7 +163,7 @@ class Home extends React.Component<any, any> {
                         </Button>
                     </Form>}
                     {this.state.loggedInNostr && <div>
-                        {!window.nostr && <span style={{color: '#8e2ebe', fontWeight: 'bold', fontSize: '20px'}}>Logged in to Nostr with: nsec*****{this.state.nostrNsec.substring(this.state.nostrNsec.length - 5)}</span>}
+                        {!window.nostr && this.state.nostrNsec && <span style={{color: '#8e2ebe', fontWeight: 'bold', fontSize: '20px'}}>Logged in to Nostr with: nsec*****{this.state.nostrNsec.substring(this.state.nostrNsec.length - 5)}</span>}
                         {window.nostr && <span style={{color: '#8e2ebe', fontWeight: 'bold', fontSize: '20px'}}>Logged in to Nostr with a browser extension, please check if your private key is setup correctly there.</span>}
                         <Button variant="primary"
                                 style={{backgroundColor: '#8e2ebe', fontWeight: 'bold', float: 'right', marginTop: '3%'}}
