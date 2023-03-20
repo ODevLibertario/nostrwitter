@@ -15,6 +15,8 @@ class Home extends React.Component<any, any> {
 
     private interval: any = undefined;
 
+    private extendedWindow = window as any
+
     constructor(props: any) {
         super(props);
         this.state = {loggedInNostr: false, loggedInTwitter: false, sending: false};
@@ -43,7 +45,7 @@ class Home extends React.Component<any, any> {
 
         this.setState({
                 ...this.state,
-                loggedInNostr: Boolean(localStorage.getItem("loggedInNostr")),
+                loggedInNostr: Boolean(localStorage.getItem("loggedInNostr") || this.extendedWindow.nostr),
                 loggedInTwitter: loggedInTwitter,
                 nostrNsec: localStorage.getItem("nostrNsec")
             }
@@ -160,9 +162,10 @@ class Home extends React.Component<any, any> {
                         </Button>
                     </Form>}
                     {this.state.loggedInNostr && <div>
-                        <span style={{color: '#8e2ebe', fontWeight: 'bold', fontSize: '20px'}}>Logged in to Nostr with: nsec*****{this.state.nostrNsec.substring(this.state.nostrNsec.length - 5)}</span>
+                        {!this.extendedWindow.nostr && <span style={{color: '#8e2ebe', fontWeight: 'bold', fontSize: '20px'}}>Logged in to Nostr with: nsec*****{this.state.nostrNsec.substring(this.state.nostrNsec.length - 5)}</span>}
+                        {this.extendedWindow.nostr && <span style={{color: '#8e2ebe', fontWeight: 'bold', fontSize: '20px'}}>Logged in to Nostr with a browser extension, please check if your private key is setup correctly there.</span>}
                         <Button variant="primary"
-                                style={{backgroundColor: '#8e2ebe', fontWeight: 'bold', float: 'right'}}
+                                style={{backgroundColor: '#8e2ebe', fontWeight: 'bold', float: 'right', marginTop: '3%'}}
                                 onClick={this.logoutNostr.bind(this)}>
                             Logout
                         </Button>
@@ -267,8 +270,8 @@ class Home extends React.Component<any, any> {
         this.setState({...this.state, sending: true})
         toast("Sending...", toastWarn)
         if(this.nostrService){
-            const imageBase64 = this.state.image[0].data_url
-            if(this.state.image && imageBase64){
+            if(this.state.image && this.state.image[0].data_url){
+                const imageBase64 = this.state.image[0].data_url
                 toast("Uploading image...", toastWarn)
                 this.backendService.upload(imageBase64).then(link => {
                     toast("Upload done", toastSuccess)
@@ -284,7 +287,11 @@ class Home extends React.Component<any, any> {
     }
 
     noteAndTweet(imageBase64?: string, imageLink?: string){
-        this.nostrService!.post(localStorage.getItem("nostrNsec")!!, this.state.post, imageLink)
+        if(this.extendedWindow.nostr){
+            this.nostrService?.postWithExtension(this.extendedWindow.nostr, this.state.post, imageLink)
+        }else {
+            this.nostrService!.postWithNsec(localStorage.getItem("nostrNsec")!!, this.state.post, imageLink)
+        }
         this.backendService.tweet(
             localStorage.getItem("oauthToken")!,
             localStorage.getItem("oauthVerifier")!,

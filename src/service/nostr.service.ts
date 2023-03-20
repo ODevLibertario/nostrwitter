@@ -1,6 +1,4 @@
 import {getEventHash, getPublicKey, nip19, signEvent, SimplePool} from "nostr-tools";
-import {toast} from "react-toastify";
-import {toastFailure, toastSuccess} from "../toast.utils";
 
 export class NostrService {
 
@@ -21,7 +19,41 @@ export class NostrService {
         })
     }
 
-    post(nsec: string, post: string, imageLink: string | undefined){
+    postWithExtension(nostr: { getPublicKey: () => Promise<string>, signEvent: (event: any) => Promise<string> }, post: string, imageLink?: string){
+        if(imageLink){
+            post = post + "\n\n"+imageLink
+        }
+
+        console.log("post "+ post)
+
+        nostr.getPublicKey().then(publicKey => {
+            let event: any = {
+                pubkey: publicKey,
+                kind: 1,
+                created_at: Math.round(Date.now() / 1000),
+                content: post,
+                tags: []
+            }
+
+            event.id = getEventHash(event)
+            nostr.signEvent(event).then((signature: any) => {
+                event.sig = signature.sig
+
+                let pub = this.pool.publish(this.connectedRelays, event)
+
+                pub.on('ok', () => {
+                        console.log("Note published to a Nostr relay")
+                    }
+                )
+                pub.on('failed', (reason: any) => {
+                    console.log("Note publication to Nostr failed: " + reason)
+                })
+            })
+        })
+
+    }
+
+    postWithNsec(nsec: string, post: string, imageLink?: string){
         const sk1 = nip19.decode(nsec).data as string
         let pk1 = getPublicKey(sk1)
 
