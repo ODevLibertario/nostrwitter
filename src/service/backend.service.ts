@@ -12,24 +12,27 @@ export class BackendService {
         })
     }
 
-    tweet(oauthToken: string, oauthVerifier: string, oauthTokenSecret: string, post: string, imageBase64: string | undefined){
-        return fetch(process.env.REACT_APP_TWITTER_BACKEND_HOST +"/twitter/tweet", {
-            method: 'POST',
+    tweet(code: string, codeVerifier: string, post: string, imageBase64: string | undefined) {
+        return fetch(
+          process.env.REACT_APP_TWITTER_BACKEND_HOST + "/twitter/tweet",
+          {
+            method: "POST",
             body: JSON.stringify({
-                oauthToken,
-                oauthVerifier,
-                oauthTokenSecret,
-                post,
-                imageBase64
-            })
-        }).then(response => {
-            console.log("Tweet sent")
-            return response.json().then(json => json)
-        }).catch(e => {
-           console.log("Tweet publicaton failed" + e)
-        })
-
-    }
+              code,
+              codeVerifier,
+              post,
+              imageBase64,
+            }),
+          }
+        )
+          .then((response) => {
+            console.log("Tweet sent");
+            return response.json().then((json) => json);
+          })
+          .catch((e) => {
+            console.log("Tweet publicaton failed" + e);
+          });
+      }
 
     ping() {
         console.log("Pinging backend")

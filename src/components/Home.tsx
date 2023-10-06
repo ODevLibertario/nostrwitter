@@ -36,12 +36,11 @@ class Home extends React.Component<any, any> {
         let loggedInTwitter = false
         const search = window.location.search;
         let queryParams = new URLSearchParams(search)
-        let oauthToken = queryParams.get("oauth_token")
-        let oauthVerifier = queryParams.get("oauth_verifier")
+        let code = queryParams.get("code")
 
-        if(oauthToken && oauthVerifier) {
+        if(code) {
             loggedInTwitter = true
-            this.loginTwitter(oauthToken, oauthVerifier)
+            this.loginTwitter(code)
         }
 
         this.setState({
@@ -204,7 +203,7 @@ class Home extends React.Component<any, any> {
     authorizeTwitter(){
         toast("Request sent. If nothing happens the backend is waking up, please try again...", toastWarn)
         this.backendService.getAuthorization().then(authorization => {
-            localStorage.setItem("oauth_token_secret", authorization.oauth_token_secret)
+            localStorage.setItem("code_verifier", authorization.codeVerifier)
             window.open(authorization.url, '_self', 'noopener,noreferrer');
         }).catch(e => console.log(e))
     }
@@ -233,16 +232,14 @@ class Home extends React.Component<any, any> {
         }
     }
 
-    loginTwitter(oauthToken: string, oauthVerifier: string){
-        localStorage.setItem("oauthToken", oauthToken)
-        localStorage.setItem("oauthVerifier", oauthVerifier)
+    loginTwitter(code: string){
+        localStorage.setItem("code", code)
         localStorage.setItem("loggedInTwitter", 'true')
     }
 
     logoutTwitter(){
-        localStorage.removeItem("oauthToken")
-        localStorage.removeItem("oauthVerifier")
-        localStorage.removeItem("oauth_token_secret")
+        localStorage.removeItem("code")
+        localStorage.removeItem("code_verifier")
         localStorage.setItem("loggedInTwitter", 'false')
         this.setState({...this.state, loggedInTwitter: false})
     }
@@ -254,8 +251,8 @@ class Home extends React.Component<any, any> {
     }
 
     logout(){
-        localStorage.removeItem("oauthToken")
-        localStorage.removeItem("oauthVerifier")
+        localStorage.removeItem("code")
+        localStorage.removeItem("code_verifier")
         localStorage.setItem("loggedInTwitter", 'false')
         localStorage.setItem("loggedInNostr", 'false')
         localStorage.removeItem("nostrNsec")
@@ -301,9 +298,8 @@ class Home extends React.Component<any, any> {
 
     private tweet(imageBase64: string | undefined) {
         this.backendService.tweet(
-            localStorage.getItem("oauthToken")!,
-            localStorage.getItem("oauthVerifier")!,
-            localStorage.getItem("oauth_token_secret")!,
+            localStorage.getItem("code")!,
+            localStorage.getItem("code_verifier")!,
             this.state.post,
             imageBase64).then(r => {
                 toast("Success!", toastSuccess)
