@@ -26,7 +26,7 @@ export class BackendService {
           }
         )
           .then((response) => {
-            console.log("Tweet sent: " + response.text());
+            console.log("Tweet sent");
             return response.json().then((json) => json);
           })
           .catch((e) => {
