@@ -105,7 +105,7 @@ class Home extends React.Component<any, any> {
                                 <div className="upload__image-wrapper"
                                      {...dragProps}
                                      style={{border: "3px dashed #8E2EBE", fontWeight: 'bold', minHeight: '250px', height: 'fit-content', alignItems: 'center', justifyContent: 'center', display: 'flex', marginBottom: '3%'}}>
-                                    {imageList.length == 0 && <span onClick={onImageUpload} style={{color: '#8E2EBE', cursor: 'pointer'}}>Click or Drag your image here</span>}
+                                    {imageList.length == 0 && <span onClick={onImageUpload} style={{color: '#8E2EBE', cursor: 'pointer'}}>Click or Drag your image here (Images are only posted to Nostr)</span>}
                                     {imageList.map((image, index) => (
                                         <div key={index} className="image-item">
                                             <img src={image['data_url']} alt="" width="250" />
