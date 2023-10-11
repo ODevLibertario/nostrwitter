@@ -53,7 +53,7 @@ class Home extends React.Component<any, any> {
 
         if(!this.state.nostrRelays) {
             console.log("Fetching public Nostr relays")
-            fetch("https://api.nostr.watch/v1/public").then(response =>
+            fetch("https://api.nostr.watch/v1/online").then(response =>
                 response.json().then(relays => {
                     this.nostrService = new NostrService(relays)
                 })
